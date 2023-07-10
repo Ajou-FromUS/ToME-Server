@@ -18,6 +18,7 @@
 ---
 
 ### Development Environment
+<p align="left">
 <img src ="https://img.shields.io/badge/FastAPI-0.95.0-005571?logo=FastAPI">
 <img src ="https://img.shields.io/badge/docker-24.0.4-%230db7ed?logo=docker">
 <img src ="https://img.shields.io/badge/python-3.11.3-3670A0?logo=python">
