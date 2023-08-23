@@ -1,5 +1,4 @@
 # Lifeteer-Server
-![표지](https://github.com/Ajou-Lifeteer/Lifeteer-iOS/assets/79050615/91d509b4-db54-42c2-8cfb-bc4a1ea43ed0)
 
 ## 한줄 소개
 2030세대를 위한 웰리빙 기록 서비스, 마음짓기 🌿
