@@ -1,0 +1,33 @@
+name: Update Dev Server and Start
+
+concurrency:
+  group: dev
+  cancel-in-progress: true # 만약 여러 workflow가 실행 중이면 마지막 workflow 제외하고 모두 취소
+
+on: # 트리거 설정 (main 브랜치에 푸시가 생길 경우)
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [ self-hosted ]
+
+    env:
+      working-directory: /home/lifeteer/dev-main/scripts/
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        clean: false
+    
+    - name: Build Docker Image
+      working-directory: ${{ env.working-directory}}
+      run: sh docker_build.sh main
+
+    - name: Stop Old Docker Container
+      run: docker rm -f fastapi-lifeteer || true
+
+    - name: Run New Docker Container
+      working-directory: ${{ env.working-directory}}
+      run: sh fastapi_run.sh main

@@ -1,3 +1,4 @@
+"""Module for running Web Server"""
 from fastapi import FastAPI
 from routers.archive_router import archive
 from routers.character_router import character
