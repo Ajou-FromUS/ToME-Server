@@ -27,3 +27,4 @@ async def update_character():
 @character.delete('/')
 async def delete_character():
     return {'msg': '캐릭터 삭제 성공'}
+

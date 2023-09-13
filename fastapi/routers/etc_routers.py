@@ -3,7 +3,6 @@ from fastapi import APIRouter
 
 etc = APIRouter()
 
-
 # 애플리케이션 로딩시 필요 데이터를 조회하기 위한 API
 @etc.get('/')
 async def init_client():
@@ -38,3 +37,4 @@ async def update_user_token():
 @etc.get('complete-mission')
 async def complete_mission():
     return {'msg': '~~~'}
+

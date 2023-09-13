@@ -27,3 +27,4 @@ async def update_archive():
 @archive.delete('/')
 async def delete_archive():
     return {'msg': '아카이브 삭제 성공'}
+
