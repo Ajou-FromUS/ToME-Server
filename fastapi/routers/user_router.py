@@ -27,4 +27,3 @@ async def update_user():
 @user.delete('/')
 async def delete_user():
     return {'msg': '사용자 삭제 성공'}
-

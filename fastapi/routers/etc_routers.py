@@ -37,4 +37,3 @@ async def update_user_token():
 @etc.get('complete-mission')
 async def complete_mission():
     return {'msg': '~~~'}
-

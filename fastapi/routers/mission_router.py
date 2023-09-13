@@ -27,4 +27,3 @@ async def update_mission():
 @mission.delete('/')
 async def delete_mission():
     return {'msg': '미션 삭제 성공'}
-
