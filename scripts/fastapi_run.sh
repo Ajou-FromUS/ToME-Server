@@ -1,0 +1,1 @@
+docker run -it -d -p 3000:8000/tcp fastapi-dev:$1
