@@ -1,0 +1,1 @@
+docker run --name mariadb-lifeteer -v /home/lifeteer/dev/mariadb:/var/lib/mysql -d -it -p 3306:3306 --env MARIADB_USER=example-user --env MARIADB_PASSWORD=my_cool_secret --env MARIADB_ROOT_PASSWORD=my-secret-pw mariadb:latest

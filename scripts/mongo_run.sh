@@ -1,0 +1,1 @@
+docker run --name mongo-lifeteer -v /home/lifeteer/dev/mongo:/data/db -d -it -p 27015:27015 mongo:4.2
