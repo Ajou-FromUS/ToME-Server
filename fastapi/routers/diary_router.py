@@ -26,4 +26,3 @@ async def update_diary():
 @diary.delete('/')
 async def delete_diary():
     return {'msg': '일기 삭제 성공'}
-
