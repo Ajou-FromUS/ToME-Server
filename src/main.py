@@ -7,16 +7,18 @@ from routers.mission_router import mission
 from routers.user_router import user
 from routers.etc_routers import etc
 
-app = FastAPI()
 
-app.include_router(archive)
-app.include_router(character)
-app.include_router(diary)
-app.include_router(mission)
-app.include_router(user)
-app.include_router(etc)
+def create_app() -> FastAPI:
+    _app = FastAPI()
+
+    _app.include_router(archive)
+    _app.include_router(character)
+    _app.include_router(diary)
+    _app.include_router(mission)
+    _app.include_router(user)
+    _app.include_router(etc)
+
+    return _app
 
 
-# @app.get("/")
-# async def home():
-#     return "Hello World"
+app = create_app()
