@@ -24,7 +24,7 @@ jobs:
         fetch-depth: 0
       
     - name: Make Sure Main is Up to Date
-      run: /usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+      run: /usr/bin/git pull origin main
     
     - name: Build Docker Image
       working-directory: ${{ env.working-directory}}
