@@ -22,7 +22,7 @@ jobs:
     #     ref: main
     #     fetch-depth: 0
     - name: Set Branch to Main
-      run: /usr/bin/git branch main
+      run: /usr/bin/git checkout main
       
     - name: Pull Origin Main
       run: /usr/bin/git pull origin main
