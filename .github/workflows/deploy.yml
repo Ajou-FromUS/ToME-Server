@@ -19,7 +19,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        clean: false
         ref: main
         fetch-depth: 0
       
