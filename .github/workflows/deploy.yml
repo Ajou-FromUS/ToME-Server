@@ -21,11 +21,10 @@ jobs:
     #   with:
     #     ref: main
     #     fetch-depth: 0
-    - name: Fetch updates
+    - name: Set Branch to Main
       run: /usr/bin/git branch main
-      run: /usr/bin/git pull origin main
       
-    - name: Make Sure Main is Up to Date
+    - name: Pull Origin Main
       run: /usr/bin/git pull origin main
     
     - name: Build Docker Image
