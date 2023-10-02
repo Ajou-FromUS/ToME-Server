@@ -20,7 +20,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         clean: false
-        ref: 'main'
+        ref: main
         fetch-depth: 0
       
     - name: Make Sure Main is Up to Date
