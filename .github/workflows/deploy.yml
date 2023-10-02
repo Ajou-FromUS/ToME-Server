@@ -28,7 +28,7 @@ jobs:
       run: sh docker_build.sh main
 
     - name: Stop Old Docker Container
-      run: docker rm -f fastapi-lifeteer || true
+      run: docker rm -f fastapi-tome || true
 
     - name: Run New Docker Container
       working-directory: ${{ env.working-directory}}
