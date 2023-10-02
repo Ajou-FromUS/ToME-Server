@@ -21,21 +21,24 @@ jobs:
     #   with:
     #     ref: main
     #     fetch-depth: 0
-    - name: Set Branch to Main
-      run: /usr/bin/git checkout main
-      working-directory: ${{env.working-directory}}
+      - name: Add Safe Directory
+        run: git config --global --add safe.directory /home/lifeteer/dev-main
+
+      - name: Set Branch to Main
+        run: /usr/bin/git checkout main
+        working-directory: ${{env.working-directory}}
+        
+      - name: Pull Origin Main
+        run: /usr/bin/git pull origin main
+        working-directory: ${{env.working-directory}}
       
-    - name: Pull Origin Main
-      run: /usr/bin/git pull origin main
-      working-directory: ${{env.working-directory}}
-    
-    - name: Build Docker Image
-      working-directory: ${{ env.working-directory}}
-      run: sh docker_build.sh main
+      - name: Build Docker Image
+        working-directory: ${{ env.working-directory}}
+        run: sh docker_build.sh main
 
-    - name: Stop Old Docker Container
-      run: docker rm -f fastapi-tome || true
+      - name: Stop Old Docker Container
+        run: docker rm -f fastapi-tome || true
 
-    - name: Run New Docker Container
-      working-directory: ${{ env.working-directory}}
-      run: sh fastapi_run.sh main
+      - name: Run New Docker Container
+        working-directory: ${{ env.working-directory}}
+        run: sh fastapi_run.sh main
