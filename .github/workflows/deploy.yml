@@ -23,9 +23,11 @@ jobs:
     #     fetch-depth: 0
     - name: Set Branch to Main
       run: /usr/bin/git checkout main
+      working-directory: ${{env.working-directory}}
       
     - name: Pull Origin Main
       run: /usr/bin/git pull origin main
+      working-directory: ${{env.working-directory}}
     
     - name: Build Docker Image
       working-directory: ${{ env.working-directory}}
