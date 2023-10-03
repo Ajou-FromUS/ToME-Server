@@ -4,6 +4,8 @@ from fastapi.testclient import TestClient
 
 @pytest.fixture
 def user():
+    """Dummy User for Testing"""
+
     return {
         "user_id": 25,
         "nickname": "dummy",
@@ -13,6 +15,8 @@ def user():
 
 
 def test_create_user(test_app: TestClient, user):
+    """Testcase: Creating User"""
+
     response = test_app.post('/user', json=user)
 
     assert response.status_code == 200
@@ -20,6 +24,8 @@ def test_create_user(test_app: TestClient, user):
 
 
 def test_create_user_less_info(test_app: TestClient, user):
+    """Testcase: Creating User Failed Due to Lack of Mandatory Field"""
+
     del user["access_token"]
     response = test_app.post('/user', json=user)
 
@@ -28,6 +34,8 @@ def test_create_user_less_info(test_app: TestClient, user):
 
 
 def test_create_user_dup(test_app: TestClient, user):
+    """Testcase: Creating User Failed Due to Duplicated User"""
+
     response = test_app.post('/user', json=user)
 
     assert response.status_code == 400
@@ -35,6 +43,8 @@ def test_create_user_dup(test_app: TestClient, user):
 
 
 def test_get_user(test_app: TestClient, user):
+    """Testcase: Getting User"""
+
     response = test_app.get(f"/user/{user['user_id']}")
 
     assert response.status_code == 200
@@ -42,6 +52,8 @@ def test_get_user(test_app: TestClient, user):
 
 
 def test_get_user_no_matching_user(test_app: TestClient, user):
+    """Testcase: Getting User Failed Due to No Matching User"""
+
     response = test_app.get(f"/user/{user['user_id'] + 1}")
 
     assert response.status_code == 404
@@ -49,6 +61,8 @@ def test_get_user_no_matching_user(test_app: TestClient, user):
 
 
 def test_update_user(test_app: TestClient, user):
+    """Testcase: Updating User"""
+
     user["nickname"] = "수정_테스트"
     response = test_app.patch(f"/user/{user['user_id']}", json=user)
 
@@ -57,6 +71,8 @@ def test_update_user(test_app: TestClient, user):
 
 
 def test_update_user_no_matching_user(test_app: TestClient, user):
+    """Testcase: Updating User Failed Due to No Matching User"""
+
     user["nickname"] = "수정_테스트"
     response = test_app.patch(f"/user/{user['user_id'] + 1}", json=user)
 
@@ -65,6 +81,8 @@ def test_update_user_no_matching_user(test_app: TestClient, user):
 
 
 def test_update_user_no_matching_field(test_app: TestClient, user):
+    """Testcase: Updating User Failed Due to No Matching Field"""
+
     user["test_field"] = "test_data"
     response = test_app.patch(f"/user/{user['user_id']}", json=user)
 
@@ -73,6 +91,8 @@ def test_update_user_no_matching_field(test_app: TestClient, user):
 
 
 def test_delete_user(test_app: TestClient, user):
+    """Testcase: Deleting User"""
+
     response = test_app.delete(f"/user/{user['user_id']}")
 
     assert response.status_code == 200
@@ -80,6 +100,8 @@ def test_delete_user(test_app: TestClient, user):
 
 
 def test_delete_user_no_matching_user(test_app: TestClient, user):
+    """Testcase: Deleting User Failed Due to No Matching User"""
+
     response = test_app.delete(f"/user/{user['user_id']}")
 
     assert response.status_code == 404
