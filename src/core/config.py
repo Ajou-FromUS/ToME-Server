@@ -13,5 +13,7 @@ class Settings:
 
     DATABASE_URL = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DATABASE}"
 
+    SECRET_KEY = os.getenv("CLIENT_SECRET")
+
 
 settings = Settings()
