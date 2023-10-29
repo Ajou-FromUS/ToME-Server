@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, File, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-
+from views import etc_view
 
 etc = APIRouter()
 
@@ -39,6 +39,13 @@ async def update_user_token():
 
 
 # 미션을 완료하기 위한 API
-@etc.get('complete-mission')
+@etc.get('/complete-mission')
 async def complete_mission():
     return {'msg': '~~~'}
+
+
+# 이미지 디텍션을 위한 API
+@etc.post('/classify')
+async def classify_image(file: UploadFile):
+    image = await file.read()
+    etc_view.classify_image_by_imagenet(image)
