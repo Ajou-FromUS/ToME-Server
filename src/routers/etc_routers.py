@@ -1,17 +1,14 @@
 from fastapi import APIRouter, Request, File, UploadFile
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from views import etc_view
 
 etc = APIRouter()
-
-templates = Jinja2Templates(directory="test")
 
 
 # 애플리케이션 로딩시 필요 데이터를 조회하기 위한 API
 @etc.get('/', response_class=HTMLResponse)
 async def init_client(request: Request):
-    return templates.TemplateResponse("test.html", {"request": request, "name": "World"})
+    return {'msg': '~~~~'}
 
 
 # 챗봇으로부터 응답을 받기 위한 API

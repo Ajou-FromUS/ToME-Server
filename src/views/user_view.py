@@ -8,34 +8,29 @@ from db.models.user_model import User
 # 사용자 생성을 위한 API
 def create_user(user_data: dict, db: Session):
     # 필수 항목 누락 체크
-    required_fields = ['user_id', 'nickname', 'access_token', 'refresh_token']
-    if not all(field in user_data for field in required_fields):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                            detail="필수 항목 중 일부가 누락되었습니다")
+    # required_fields = ['user_id', 'nickname']
+    # if not all(field in user_data for field in required_fields):
+    #     raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+    #                         detail="필수 항목 중 일부가 누락되었습니다")
 
     try:
-        user = User(
-            user_id=user_data['user_id'],
-            nickname=user_data['nickname'],
-            milestone=0,
-            current_character_id=0,
-            current_character_exp=0,
-            snack_num=0,
-            access_token=user_data['access_token'],
-            refresh_token=user_data['refresh_token'],
-            created_at=datetime.now(),
-            modified_at=datetime.now(),
-            last_connection=datetime.now()
-        )
+        # user = User(
+        #     user_id=user_data['user_id'],
+        #     nickname=user_data['nickname'],
+        #     milestone=0,
+        #     created_at=datetime.now(),
+        #     modified_at=datetime.now(),
+        #     last_connection=datetime.now()
+        # )
 
-        db.add(user)
-        db.commit()
-        db.refresh(user)
+        # db.add(user)
+        # db.commit()
+        # db.refresh(user)
 
         return {
             "status_code": status.HTTP_201_CREATED,
             "detail": "사용자 생성 성공",
-            "data": user
+            # "data": user
         }
     except IntegrityError:
         db.rollback()
