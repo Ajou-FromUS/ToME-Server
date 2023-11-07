@@ -15,8 +15,8 @@ user = APIRouter(
 async def create_user(request: Request, db: Session = Depends(get_db), token: str = Depends(verify_token)):
     user_data = await request.json()
 
-    # res = user_view.create_user(user_data=user_data, db=db)
-    # return res
+    res = user_view.create_user(user_data=user_data, db=db)
+    return res
 
 
 # 사용자 조회를 위한 API
