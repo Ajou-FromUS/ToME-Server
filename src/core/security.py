@@ -1,4 +1,4 @@
-from fastapi import Header, HTTPException, status, Request
+from fastapi import HTTPException, status, Request
 from dotenv import load_dotenv
 
 import jwt
@@ -18,7 +18,6 @@ def verify_token(request: Request):
 
         # 추출된 Access Token 검증
         decoded_token = jwt.decode(access_token, secret_key, algorithms=["HS256"])
-        print(decoded_token)
         return decoded_token
     except jwt.ExpiredSignatureError:
         # raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="토큰이 만료되었습니다")
@@ -31,8 +30,8 @@ def verify_token(request: Request):
         }
         data = {'accessToken': access_token}
         response = requests.post(url, headers=headers, json=data)
-
         print(response.json())
+
     except jwt.DecodeError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     except BaseException as e:
