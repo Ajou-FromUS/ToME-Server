@@ -6,18 +6,19 @@ from db.models.user_model import User
 
 
 # 사용자 생성을 위한 API
-def create_user(user_data: dict, db: Session):
+def create_user(user_data: dict, db: Session, token: str):
     # 필수 항목 누락 체크
-    required_fields = ['user_id', 'nickname']
+    required_fields = ['nickname']
     if not all(field in user_data for field in required_fields):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                             detail="필수 항목 중 일부가 누락되었습니다")
 
     try:
+        uid = token['uid']
+
         user = User(
-            user_id=user_data['user_id'],
+            uid=uid,
             nickname=user_data['nickname'],
-            milestone=0,
             created_at=datetime.now(),
             modified_at=datetime.now(),
             last_connection=datetime.now()
@@ -43,8 +44,8 @@ def create_user(user_data: dict, db: Session):
 
 
 # 사용자 조회를 위한 API
-def get_user_by_id(user_id: int, db: Session):
-    user = db.query(User).filter(User.user_id == user_id).first()
+def get_user_by_id(db: Session, token: str):
+    user = db.query(User).filter(User.uid == token['uid']).first()
 
     if user is not None:
         return {
@@ -58,8 +59,8 @@ def get_user_by_id(user_id: int, db: Session):
 
 
 # 사용자 업데이트를 위한 API
-def update_user_by_id(user_id: int, data: dict, db: Session):
-    user = get_user_by_id(user_id, db)['data']
+def update_user_by_id(data: dict, db: Session, token: str):
+    user = get_user_by_id(db, token)['data']
     valid = False
 
     # 일치하는 항목이 사용자 모델에 존재하는지 체크
@@ -86,8 +87,8 @@ def update_user_by_id(user_id: int, data: dict, db: Session):
 
 
 # 사용자 삭제를 위한 API
-def delete_user(user_id: int, db: Session):
-    user = get_user_by_id(user_id, db)['data']
+def delete_user(db: Session, token: str):
+    user = get_user_by_id(db, token)['data']
 
     db.delete(user)
     db.commit()

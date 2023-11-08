@@ -9,19 +9,19 @@ archive = APIRouter(
 
 
 # 아카이브 저장을 위한 API
-@archive.post("/")
-async def create_archive(request: Request, db: Session = Depends(get_db)):
-    archive_data = await request.json()
+# @archive.post("/")
+# async def create_archive(request: Request, db: Session = Depends(get_db)):
+#     archive_data = await request.json()
 
-    res = archive_view.create_archive(archive_data=archive_data, db=db)
-    return res
+#     res = archive_view.create_archive(archive_data=archive_data, db=db)
+#     return res
 
 
-# 아카이브 조회를 위한 API
-@archive.get("/")
-def get_user(archive_id:int, user_id: int, db: Session = Depends(get_db)):
-    res = archive_view.get_archive_by_id(archive_id=archive_id,user_id=user_id, db=db)
-    return res
+# # 아카이브 조회를 위한 API
+# @archive.get("/")
+# def get_user(archive_id:int, user_id: int, db: Session = Depends(get_db)):
+#     res = archive_view.get_archive_by_id(archive_id=archive_id,user_id=user_id, db=db)
+#     return res
 
 
 # # 사용자 업데이트를 위한 API

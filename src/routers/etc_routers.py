@@ -23,22 +23,10 @@ async def get_monthly_log():
     return {'msg': '~~~'}
 
 
-# 사용자의 아카이브 활동기록을 조회하기 위한 API
-@etc.get('/get-archive-log')
-async def get_archive_log():
-    return {'msg': '~~~'}
-
-
 # 사용자의 Toekn을 재발급하기 위한 API
-@etc.get('/update-token')
-async def update_user_token():
-    return {'msg': '~~~'}
-
-
-# 미션을 완료하기 위한 API
-@etc.get('/complete-mission')
-async def complete_mission():
-    return {'msg': '~~~'}
+@etc.get('/refresh-token')
+async def refresh_user_token(request: Request):
+    return etc_view.refresh_token(request)
 
 
 # 이미지 디텍션을 위한 API

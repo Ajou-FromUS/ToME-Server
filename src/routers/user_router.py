@@ -15,28 +15,28 @@ user = APIRouter(
 async def create_user(request: Request, db: Session = Depends(get_db), token: str = Depends(verify_token)):
     user_data = await request.json()
 
-    res = user_view.create_user(user_data=user_data, db=db)
+    res = user_view.create_user(user_data=user_data, db=db, token=token)
     return res
 
 
 # 사용자 조회를 위한 API
-@user.get("/{user_id}")
-def get_user(user_id: int, db: Session = Depends(get_db)):
-    res = user_view.get_user_by_id(user_id=user_id, db=db)
+@user.get("")
+def get_user(request: Request, db: Session = Depends(get_db), token: str = Depends(verify_token)):
+    res = user_view.get_user_by_id(db=db, token=token)
     return res
 
 
 # 사용자 업데이트를 위한 API
-@user.patch("/{user_id}")
-async def update_user(request: Request, user_id: int, db: Session = Depends(get_db)):
+@user.patch("")
+async def update_user(request: Request, db: Session = Depends(get_db), token: str = Depends(verify_token)):
     update_data = await request.json()
 
-    res = user_view.update_user_by_id(user_id=user_id, data=update_data, db=db)
+    res = user_view.update_user_by_id(data=update_data, db=db, token=token)
     return res
 
 
 # 사용자 삭제를 위한 API
-@user.delete("/{user_id}")
-async def delete_user(user_id: int, db: Session = Depends(get_db)):
-    res = user_view.delete_user(user_id=user_id, db=db)
+@user.delete("")
+async def delete_user(request: Request, db: Session = Depends(get_db), token: str = Depends(verify_token)):
+    res = user_view.delete_user(db=db, token=token)
     return res
