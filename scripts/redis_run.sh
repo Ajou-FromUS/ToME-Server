@@ -1,0 +1,1 @@
+docker run --name redis-lifeteer -d -it -p 6379:6379 redis:latest

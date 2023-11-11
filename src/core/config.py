@@ -15,5 +15,9 @@ class Settings:
 
     SECRET_KEY = os.getenv("CLIENT_SECRET")
 
+    REDIS_HOST: str = os.getenv("REDIS_URL")
+    REDIS_PORT: str = os.getenv("REDIS_PORT")
+
+
 
 settings = Settings()
