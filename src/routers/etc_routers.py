@@ -30,7 +30,7 @@ async def refresh_user_token(request: Request):
 
 
 # 이미지 디텍션을 위한 API
-@etc.post('/classify')
-async def classify_image(file: UploadFile):
-    image = await file.read()
-    etc_view.classify_image_by_imagenet(image)
+# @etc.post('/classify')
+# async def classify_image(file: UploadFile):
+#     image = await file.read()
+#     etc_view.classify_image_by_imagenet(image)

@@ -30,7 +30,7 @@ def get_user(request: Request, db: Session = Depends(get_db), token: str = Depen
 async def update_user(request: Request, db: Session = Depends(get_db), token: str = Depends(verify_token)):
     update_data = await request.json()
 
-    res = user_view.update_user_by_id(data=update_data, db=db, token=token)
+    res = user_view.update_user_by_id(update_data=update_data, db=db, token=token)
     return res
 
 
