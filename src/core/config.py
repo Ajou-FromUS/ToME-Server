@@ -18,6 +18,13 @@ class Settings:
     REDIS_HOST: str = os.getenv("REDIS_HOST")
     REDIS_PORT: str = os.getenv("REDIS_PORT")
 
+    CHAT_LOG_PATH: str = os.getenv("CHAT_LOG_PATH")
+    CHAT_INPUT_TEXT: str = os.getenv("CHAT_INPUT_TEXT")
+    
+    CLOVA_BASE_URL: str = os.getenv("CLOVA_BASE_URL")
+    CLOVA_API_KEY_ID: str = os.getenv("CLOVA_API_KEY_ID")
+    CLOVA_API_KEY: str = os.getenv("CLOVA_API_KEY")
+
 
 
 settings = Settings()
