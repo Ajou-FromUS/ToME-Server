@@ -77,7 +77,9 @@ def get_mission_by_id(mission_id: int, db: Session):
 
 def update_mission_by_id(mission_id: int, update_data: dict, db: Session):
     try:
-        mission = get_mission_by_id(mission_id, db)
+        mission = db.query(Mission).filter(Mission.id == mission_id).first()
+        if not mission:
+            return handle_error(status.HTTP_404_NOT_FOUND, "일치하는 미션이 존재하지 않습니다")
 
         # 매개변수로 넘어온 항목이 실제 데이터에 없을 경우 에러 반환
         # 존재하 경우엔 Valid를 True로 바꾼 뒤 업데이트 수행
@@ -106,7 +108,9 @@ def update_mission_by_id(mission_id: int, update_data: dict, db: Session):
 
 def delete_mission_by_id(mission_id: int, db: Session):
     try:
-        mission = get_mission_by_id(mission_id, db)
+        mission = db.query(Mission).filter(Mission.id == mission_id).first()
+        if not mission:
+            return handle_error(status.HTTP_404_NOT_FOUND, "일치하는 미션이 존재하지 않습니다")
 
         db.delete(mission)
         db.commit()
