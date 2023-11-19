@@ -3,6 +3,11 @@ from redis import Redis
 from bardapi import BardCookies
 import time
 import traceback
+import requests
+import json
+from datetime import datetime
+from pathlib import Path
+from core.config import Settings
 
 # 채팅 답변 요청
 def chat(chat_data: dict, redis_client: Redis, token: str):
@@ -14,8 +19,6 @@ def chat(chat_data: dict, redis_client: Redis, token: str):
                             detail="필수 항목 중 일부가 누락되었습니다")
 
     try:
-        # test
-        # token={'uid':'dummy'}
 
         uid = token['uid']
 
@@ -23,16 +26,9 @@ def chat(chat_data: dict, redis_client: Redis, token: str):
 
         bard = BardCookies(cookie_dict=cookie_dict)
 
-        length = '20'
-
         user_text = chat_data['content']
 
-        input_text = f'''
-        너는 앞으로 말투를 친구랑 대화하듯이 해줘. 답변은 꼭 {length}자 이내로 해주고, 답변을 할 때에는 내 말에 대한 공감과 질문도 함께 해줘야 돼.
-        답변은 대괄호로 감싸줘. 다음 말에 대해 답변을 해줘.
-
-        {user_text}
-        '''
+        input_text = Settings.CHAT_INPUT_TEXT + user_text
 
         start_time = time.time()
         response=bard.get_answer(input_text)['content']
@@ -43,7 +39,40 @@ def chat(chat_data: dict, redis_client: Redis, token: str):
         start_idx = response.find('[')
         end_idx = response.find(']')
         answer = response[start_idx+1:end_idx]
-        print(f"uid: {uid} Elapsed Time: {elapsed_time} Input Text: {user_text} Output Text: {answer}")
+
+        # Naver Clova Sentiment
+        clova_base_url = Settings.CLOVA_BASE_URL
+        clova_request_headers = {
+            "X-NCP-APIGW-API-KEY-ID":Settings.CLOVA_API_KEY_ID,
+            "X-NCP-APIGW-API-KEY":Settings.CLOVA_API_KEY,
+            "Content-Type":"application/json"
+        }
+        clova_data= {
+            "content":user_text
+        }
+
+        clova_response=requests.post(url=clova_base_url,json=clova_data,headers=clova_request_headers)
+        clova_content = json.loads(clova_response.text)
+        sentiment = clova_content['document']['sentiment']
+
+        print(f"uid: {uid} Elapsed Time: {elapsed_time} Input Text: {user_text} Output Text: {answer} Clova Answer: {sentiment}")
+
+        now = datetime.now()
+        year = now.year
+        month = now.month
+        day = now.day
+        
+        user_text_log_dir_path = "/".join([Settings.CHAT_LOG_PATH,uid])
+        user_text_log_file_path = user_text_log_dir_path+"/"+"-".join([str(year),str(month),str(day)])+".txt"
+        Path(user_text_log_dir_path).mkdir(parents=True, exist_ok=True)
+        user_text_log_file=open(user_text_log_file_path,mode="a+t")
+        user_text_log_file.write(" - ".join([now.ctime(),user_text,sentiment])+"\n")
+        user_text_log_file.close()
+
+        user_text_log_file=open(user_text_log_file_path,mode="r")
+        line_count = len(user_text_log_file.readlines())
+        # TODO: line_count를 기반으로 미션 생성 함수 호출
+        
         return {
             "status_code": status.HTTP_200_OK,
             "detail": "채팅 답변 생성 성공",
