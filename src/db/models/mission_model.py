@@ -1,9 +1,6 @@
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from db.session import engine
-
-Base = declarative_base()
-Base.metadata.create_all(bind=engine)
+from sqlalchemy.orm import relationship
+from db.base import Base
 
 
 class Mission(Base):
@@ -14,3 +11,5 @@ class Mission(Base):
     content = Column(String(255), nullable=True)
     type = Column(Integer, nullable=False)
     emotion = Column(Integer, nullable=False)
+
+    user_missions = relationship("UserMission", back_populates="mission")

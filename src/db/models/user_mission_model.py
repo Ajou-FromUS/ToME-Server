@@ -1,22 +1,18 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
-from db.session import engine
-from db.models.user_model import User
-from db.models.mission_model import Mission
-
-Base = declarative_base()
-Base.metadata.create_all(bind=engine)
+from db.base import Base
 
 
 class UserMission(Base):
     __tablename__ = "userMissions"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey(User.id), nullable=False)
-    mission_id = Column(Integer, ForeignKey(Mission.id), nullable=False)
+    uid = Column(Integer, ForeignKey('users.id'), nullable=False)
+    mission_id = Column(Integer, ForeignKey('missions.id'), nullable=False)
     content = Column(String(255), nullable=True)
     is_completed = Column(Boolean, default=False)
+    created_at = Column(DateTime, nullable=False)
+    modified_at = Column(DateTime, nullable=False)
 
     user = relationship("User", back_populates="user_missions")
     mission = relationship("Mission", back_populates="user_missions")

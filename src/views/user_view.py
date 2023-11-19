@@ -6,9 +6,11 @@ from fastapi.encoders import jsonable_encoder
 from datetime import datetime
 from db.models.user_model import User
 
+
 # 에러 처리를 위한 함수
 def handle_error(status_code, detail):
     return JSONResponse(content={"status_code": status_code, "detail": detail}, status_code=status_code)
+
 
 # 사용자 생성을 위한 API
 def create_user(user_data: dict, db: Session, token: str):

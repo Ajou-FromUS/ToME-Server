@@ -14,6 +14,9 @@ def refresh_token(request):
     access_token = request.headers['access_token']
     refresh_token = request.headers['refresh_token']
 
+    print(access_token)
+    print(refresh_token)
+
     url = 'https://api.furo.one/sessions/token/refresh'
     headers = {
         'Content-Type': 'application/json',
@@ -21,6 +24,8 @@ def refresh_token(request):
     }
     data = {'accessToken': access_token}
     response = requests.post(url, headers=headers, json=data)
+
+    print(response.json())
 
     new_token = response.json().get('access_token')
     return {'access_token': new_token} if new_token else None
