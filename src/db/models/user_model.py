@@ -1,9 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.ext.declarative import declarative_base
-from db.session import engine
-
-Base = declarative_base()
-Base.metadata.create_all(bind=engine)
+from sqlalchemy.orm import relationship
+from db.base import Base
 
 
 class User(Base):
@@ -15,3 +12,5 @@ class User(Base):
     created_at = Column(DateTime, nullable=False)
     modified_at = Column(DateTime, nullable=False)
     last_connection = Column(DateTime, nullable=False)
+
+    user_missions = relationship("UserMission", back_populates="user")
