@@ -1,16 +1,19 @@
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
-from fastapi import status, HTTPException
+from fastapi import status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
+from collections import Counter
 
 from datetime import datetime
-from redis import Redis
 
 from db.models.mission_model import Mission
 from db.models.user_model import User
 from db.models.user_mission_model import UserMission
+from core.config import Settings
+
+import os
 
 
 # 에러 처리를 위한 함수
@@ -18,24 +21,50 @@ def handle_error(status_code, detail):
     return JSONResponse(content={"status_code": status_code, "detail": detail}, status_code=status_code)
 
 
+# 사용자 로그 파일을 통해 가장 잦은 감정 추출
+def count_emotions(file_path):
+    emotion_to_category = {
+        'neutral': 0,
+        'positive': 1,
+        'negative': 2
+    }
+
+    emotion_counter = Counter()
+
+    with open(file_path, 'r') as file:
+        for line in file:
+            parts = line.strip().split(' - ')
+            if len(parts) >= 2:
+                emotion = parts[-1]
+                category = emotion_to_category.get(emotion, 'unknown')
+                emotion_counter[category] += 1
+
+    # 해당 카운터 중 가장 빈도가 잦은 항목만 추출
+    most_common_emotion = emotion_counter.most_common(1)
+    if most_common_emotion:
+        return most_common_emotion[0][0]
+    else:
+        return None
+
+    return emotion_counter
+
+
 # 사용자 생성을 위한 API
 def create_user_mission(db: Session, token: str):
+    now = datetime.now()
+    year = now.year
+    month = now.month
+    day = now.day
+
     uid = token['uid']
+    user_text_log_dir_path = os.path.join("/", Settings.CHAT_LOG_PATH, uid)
+    user_text_log_file_path = user_text_log_dir_path + "/" + "-".join([str(year), str(month), str(day)]) + ".txt"
 
-    ''' TODO
-    Redis 클라이언트로부터 사용자의 오늘 감정 기록을 가져와 해당하는 미션 객체 가져오기
-    해당 날짜의 감정 기록 중 빈도가 가장 잦은 감정을 기반으로 미션 선택
-    '''
+    frequent_emotion = count_emotions(user_text_log_file_path)
 
-    frequent_emotion = 0
-    
     user = db.query(User).filter(User.uid == uid).first()
     if not user:
         return handle_error(status.HTTP_404_NOT_FOUND, "일치하는 사용자가 존재하지 않습니다")
-    
-    ''' TODO
-    이미 생성된 미션일 경우, 중복 방지를 위해 해당 미션을 제외하고 나머지 미션중에서 선택해야 함
-    '''
 
     mission = db.query(Mission).filter(Mission.emotion == frequent_emotion).first()
     if not mission:
@@ -155,14 +184,14 @@ def update_user_mission_by_id(mission_id, update_data, db, token):
         print(e)
         db.rollback()
         return handle_error(status.HTTP_500_INTERNAL_SERVER_ERROR, "미션 업데이트 중 오류가 발생하였습니다")
-    
+
 
 def delete_user_mission_by_id(mission_id, db, token):
     try:
         user_mission = db.query(UserMission).filter(UserMission.id == mission_id).first()
         if not user_mission:
             return handle_error(status.HTTP_404_NOT_FOUND, "일치하는 미션이 존재하지 않습니다")
-        
+
         db.delete(user_mission)
         db.commit()
 

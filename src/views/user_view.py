@@ -50,6 +50,9 @@ def create_user(user_data: dict, db: Session, token: str):
 def get_user_by_id(db: Session, token: str):
     try:
         user = db.query(User).filter(User.uid == token['uid']).first()
+        if not user:
+            return handle_error(status.HTTP_404_NOT_FOUND, "일치하는 사용자가 존재하지 않습니다")
+
         user_json = jsonable_encoder(user)
 
         if user:
@@ -66,7 +69,10 @@ def get_user_by_id(db: Session, token: str):
 # 사용자 업데이트를 위한 API
 def update_user_by_id(update_data: dict, db: Session, token: str):
     try:
-        user = get_user_by_id(db, token).data
+        user = db.query(User).filter(User.uid == token['uid']).first()
+        if not user:
+            return handle_error(status.HTTP_404_NOT_FOUND, "일치하는 사용자가 존재하지 않습니다")
+
         valid = False
 
         # 일치하는 항목이 사용자 모델에 존재하는지 체크
@@ -96,7 +102,9 @@ def update_user_by_id(update_data: dict, db: Session, token: str):
 # 사용자 삭제를 위한 API
 def delete_user(db: Session, token: str):
     try:
-        user = get_user_by_id(db, token).data
+        user = db.query(User).filter(User.uid == token['uid']).first()
+        if not user:
+            return handle_error(status.HTTP_404_NOT_FOUND, "일치하는 사용자가 존재하지 않습니다")
 
         db.delete(user)
         db.commit()

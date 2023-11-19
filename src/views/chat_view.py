@@ -1,17 +1,21 @@
 from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
 from redis import Redis
 from bardapi import BardCookies
+from datetime import datetime
+from pathlib import Path
+
+from core.config import Settings
+from views.user_mission_view import create_user_mission
+
 import time
 import traceback
 import requests
 import json
-from datetime import datetime
-from pathlib import Path
-from core.config import Settings
+
 
 # 채팅 답변 요청
-def chat(chat_data: dict, redis_client: Redis, token: str):
-# def chat(chat_data: dict, redis_client: Redis):
+def chat(chat_data: dict, db: Session, redis: Redis, token: str):
     # 필수 항목 누락 체크
     required_fields = ['content']
     if not all(field in chat_data for field in required_fields):
@@ -19,23 +23,18 @@ def chat(chat_data: dict, redis_client: Redis, token: str):
                             detail="필수 항목 중 일부가 누락되었습니다")
 
     try:
-
         uid = token['uid']
-
-        cookie_dict = redis_client.hgetall('cookies')
+        cookie_dict = redis.hgetall('cookies')
 
         bard = BardCookies(cookie_dict=cookie_dict)
-
         user_text = chat_data['content']
-
         input_text = Settings.CHAT_INPUT_TEXT + user_text
 
         start_time = time.time()
-        response=bard.get_answer(input_text)['content']
+        response = bard.get_answer(input_text)['content']
         end_time = time.time()
         elapsed_time = end_time-start_time
 
-        
         start_idx = response.find('[')
         end_idx = response.find(']')
         answer = response[start_idx+1:end_idx]
@@ -43,15 +42,15 @@ def chat(chat_data: dict, redis_client: Redis, token: str):
         # Naver Clova Sentiment
         clova_base_url = Settings.CLOVA_BASE_URL
         clova_request_headers = {
-            "X-NCP-APIGW-API-KEY-ID":Settings.CLOVA_API_KEY_ID,
-            "X-NCP-APIGW-API-KEY":Settings.CLOVA_API_KEY,
-            "Content-Type":"application/json"
+            "X-NCP-APIGW-API-KEY-ID": Settings.CLOVA_API_KEY_ID,
+            "X-NCP-APIGW-API-KEY": Settings.CLOVA_API_KEY,
+            "Content-Type": "application/json"
         }
-        clova_data= {
-            "content":user_text
+        clova_data = {
+            "content": user_text
         }
 
-        clova_response=requests.post(url=clova_base_url,json=clova_data,headers=clova_request_headers)
+        clova_response = requests.post(url=clova_base_url, json=clova_data, headers=clova_request_headers)
         clova_content = json.loads(clova_response.text)
         sentiment = clova_content['document']['sentiment']
 
@@ -61,18 +60,20 @@ def chat(chat_data: dict, redis_client: Redis, token: str):
         year = now.year
         month = now.month
         day = now.day
-        
+
         user_text_log_dir_path = "/".join([Settings.CHAT_LOG_PATH,uid])
         user_text_log_file_path = user_text_log_dir_path+"/"+"-".join([str(year),str(month),str(day)])+".txt"
         Path(user_text_log_dir_path).mkdir(parents=True, exist_ok=True)
-        user_text_log_file=open(user_text_log_file_path,mode="a+t")
-        user_text_log_file.write(" - ".join([now.ctime(),user_text,sentiment])+"\n")
+        user_text_log_file = open(user_text_log_file_path, mode="a+t")
+        user_text_log_file.write(" - ".join([now.ctime(), user_text, sentiment]) + "\n")
         user_text_log_file.close()
 
-        user_text_log_file=open(user_text_log_file_path,mode="r")
+        # 사용자가 응답을 5회 할때마다 새로운 미션 생성
+        user_text_log_file = open(user_text_log_file_path, mode="r")
         line_count = len(user_text_log_file.readlines())
-        # TODO: line_count를 기반으로 미션 생성 함수 호출
-        
+        if line_count < 15 and line_count % 5 == 0:
+            create_user_mission(db, token)
+
         return {
             "status_code": status.HTTP_200_OK,
             "detail": "채팅 답변 생성 성공",
