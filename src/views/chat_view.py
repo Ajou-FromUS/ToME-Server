@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from redis import Redis
 from bardapi import BardCookies
 from datetime import datetime
@@ -7,6 +8,8 @@ from pathlib import Path
 
 from core.config import Settings
 from views.user_mission_view import create_user_mission
+from db.models.user_model import User
+from db.models.user_mission_model import UserMission
 
 import time
 import traceback
@@ -16,14 +19,24 @@ import json
 
 # 채팅 답변 요청
 def chat(chat_data: dict, db: Session, redis: Redis, token: str):
+    uid = token['uid']
+
     # 필수 항목 누락 체크
     required_fields = ['content']
     if not all(field in chat_data for field in required_fields):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                             detail="필수 항목 중 일부가 누락되었습니다")
 
+    if chat_data.get('content') is None:
+        mission_count = get_mission_count(db, uid)
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "detail": "사용자 미션 개수 조회 성공",
+            "mission_count": mission_count
+        }
+
     try:
-        uid = token['uid']
         cookie_dict = redis.hgetall('cookies')
 
         bard = BardCookies(cookie_dict=cookie_dict)
@@ -62,7 +75,7 @@ def chat(chat_data: dict, db: Session, redis: Redis, token: str):
         day = now.day
 
         user_text_log_dir_path = "/".join([Settings.CHAT_LOG_PATH,uid])
-        user_text_log_file_path = user_text_log_dir_path+"/"+"-".join([str(year),str(month),str(day)])+".txt"
+        user_text_log_file_path = user_text_log_dir_path+"/"+"-".join([str(year), str(month), str(day)])+".txt"
         Path(user_text_log_dir_path).mkdir(parents=True, exist_ok=True)
         user_text_log_file = open(user_text_log_file_path, mode="a+t")
         user_text_log_file.write(" - ".join([now.ctime(), user_text, sentiment]) + "\n")
@@ -71,15 +84,32 @@ def chat(chat_data: dict, db: Session, redis: Redis, token: str):
         # 사용자가 응답을 5회 할때마다 새로운 미션 생성
         user_text_log_file = open(user_text_log_file_path, mode="r")
         line_count = len(user_text_log_file.readlines())
-        if line_count < 15 and line_count % 5 == 0:
+        if line_count <= 15 and line_count % 5 == 0:
             create_user_mission(db, token)
+
+        # 현재 사용자의 미션 갯수 조회
+        mission_count = get_mission_count(db, uid)
 
         return {
             "status_code": status.HTTP_200_OK,
             "detail": "채팅 답변 생성 성공",
-            "message": answer
+            "message": answer,
+            "mission_count": mission_count
         }
     except Exception:
         traceback.print_exc()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="채팅 답변 생성 중 서버에 오류가 발생하였습니다")
+
+
+# 사용자의 현재 미션 개수를 조회하기 위한 함수
+def get_mission_count(db, uid):
+    now = datetime.now()
+
+    current_date = now.strftime("%Y-%m-%d")
+    mission_count = db.query(func.count(UserMission.id)) \
+                        .join(User) \
+                        .filter(User.uid == uid, func.date(UserMission.created_at) == current_date) \
+                        .scalar()
+
+    return mission_count
