@@ -57,16 +57,33 @@ def create_user_mission(db: Session, token: str):
     day = now.day
 
     uid = token['uid']
-    user_text_log_dir_path = os.path.join("/", Settings.CHAT_LOG_PATH, uid)
-    user_text_log_file_path = user_text_log_dir_path + "/" + "-".join([str(year), str(month), str(day)]) + ".txt"
-
-    frequent_emotion = count_emotions(user_text_log_file_path)
 
     user = db.query(User).filter(User.uid == uid).first()
     if not user:
         return handle_error(status.HTTP_404_NOT_FOUND, "일치하는 사용자가 존재하지 않습니다")
 
-    mission = db.query(Mission).filter(Mission.emotion == frequent_emotion).first()
+    # 사용자에게 오늘 생성된 미션 개수를 카운트하여 생성할 미션 타입 지정
+    current_mission_count = db.query(UserMission).filter(
+        UserMission.uid == user.id,
+        func.date(UserMission.created_at) == now.date()
+    ).count()
+
+    if current_mission_count == 0:
+        mission_type = 0
+    elif current_mission_count == 1:
+        mission_type = 1
+    else:
+        mission_type = 2
+
+    # 챗봇 로그 파일로부터 가장 빈번한 감정 추출
+    user_text_log_dir_path = os.path.join("/", Settings.CHAT_LOG_PATH, uid)
+    user_text_log_file_path = user_text_log_dir_path + "/" + "-".join([str(year), str(month), str(day)]) + ".txt"
+    frequent_emotion = count_emotions(user_text_log_file_path)
+
+    mission = db.query(Mission).filter(
+        Mission.emotion == frequent_emotion,
+        Mission.type == mission_type
+    ).first()
     if not mission:
         return handle_error(status.HTTP_404_NOT_FOUND, "일치하는 미션이 존재하지 않습니다")
 
