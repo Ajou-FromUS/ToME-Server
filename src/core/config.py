@@ -25,5 +25,12 @@ class Settings:
     CLOVA_API_KEY_ID: str = os.getenv("CLOVA_API_KEY_ID")
     CLOVA_API_KEY: str = os.getenv("CLOVA_API_KEY")
 
+    KEYWORD_IMG_PATH: str = os.getenv("KEYWORD_IMG_PATH")
+
+    S3_BUCKET_NAME: str = os.getenv("S3_BUCKET_NAME")
+    S3_ACCESS_KEY: str = os.getenv("S3_ACCESS_KEY")
+    S3_SECRET_KEY: str = os.getenv("S3_SECRET_KEY")
+    S3_REGION: str = os.getenv("S3_REGION")
+
 
 settings = Settings()
