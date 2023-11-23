@@ -31,6 +31,6 @@ class Settings:
     S3_ACCESS_KEY: str = os.getenv("S3_ACCESS_KEY")
     S3_SECRET_KEY: str = os.getenv("S3_SECRET_KEY")
     S3_REGION: str = os.getenv("S3_REGION")
-
+    S3_BUCKET_URL: str = os.getenv("S3_BUCKET_URL")
 
 settings = Settings()
