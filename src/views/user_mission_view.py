@@ -46,8 +46,6 @@ def count_emotions(file_path):
     else:
         return None
 
-    return emotion_counter
-
 
 # 사용자 생성을 위한 API
 def create_user_mission(db: Session, token: str):
@@ -173,11 +171,22 @@ def get_user_mission_by_data(date, db, token):
 
 
 # 특정 미션을 업데이트하기 위한 API
-def update_user_mission_by_id(mission_id, update_data, db, token):
+def update_user_mission_by_id(mission_id, mission_image, update_data, db, token):
     try:
+        # 사용자 미션 조회
         user_mission = db.query(UserMission).filter(UserMission.id == mission_id).first()
         if not user_mission:
             return handle_error(status.HTTP_404_NOT_FOUND, "일치하는 미션이 존재하지 않습니다")
+
+        # 텍스트
+        if user_mission.mission.type == 0:      # 텍스트기반 미션
+            print(update_data)
+        elif user_mission.mission.type == 1:    # 이미지기반 미션
+            print(mission_image)
+        elif user_mission.mission.type == 2:    # 데시벨기반 미션
+            print(update_data)
+        else:
+            print("HELLO")
 
         valid = False
         for key, value in update_data.items():

@@ -25,5 +25,7 @@ class Settings:
     CLOVA_API_KEY_ID: str = os.getenv("CLOVA_API_KEY_ID")
     CLOVA_API_KEY: str = os.getenv("CLOVA_API_KEY")
 
+    S3_BUCKET_URL: str = os.getenv("S3_BUCKET_URL")
+
 
 settings = Settings()
