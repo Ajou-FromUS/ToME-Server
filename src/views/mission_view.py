@@ -22,9 +22,9 @@ def create_mission(mission_data: dict, db: Session):
         title = mission_data.get('title')
         type = mission_data.get('type')
         emotion = mission_data.get('emotion')
-        content = mission_data.get('content')
+        keyword = mission_data.get('keyword')
 
-        mission = Mission(title=title, content=content, type=type, emotion=emotion)
+        mission = Mission(title=title, keyword=keyword, type=type, emotion=emotion)
         mission_json = jsonable_encoder(mission)
 
         db.add(mission)

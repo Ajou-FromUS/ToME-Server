@@ -84,11 +84,10 @@ def chat(chat_data: dict, db: Session, redis: Redis, token: str):
         # 사용자가 응답을 5회 할때마다 새로운 미션 생성
         user_text_log_file = open(user_text_log_file_path, mode="r")
         line_count = len(user_text_log_file.readlines())
-        if line_count <= 15 and line_count % 5 == 0:
-            create_user_mission(db, token)
-
-        # 현재 사용자의 미션 갯수 조회
         mission_count = get_mission_count(db, uid)
+
+        if mission_count < 3 and line_count % 5 == 0:
+            create_user_mission(db, token)
 
         return {
             "status_code": status.HTTP_200_OK,
