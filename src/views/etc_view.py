@@ -60,19 +60,15 @@ def get_monthly_log_by_user(date, db, token):
     file_pattern = os.path.join(user_text_log_dir_path, f"{year}-{month}-*.txt")
     log_files = glob.glob(file_pattern)
 
-    emotion_counts = Counter()
+    emotion_counter = Counter()
 
     # prefix와 일치하는 모든 파일들을 순회
     for file_path in log_files:
-        with open(file_path, 'r') as file:
-            for line in file:
-                parts = line.strip().split(' - ')
-                emotion = parts[-1]
-                emotion_counts[emotion] += 1
+        emotion_counter = count_emotions(emotion_counter, file_path)
 
     # 감정 갯수를 백분위로 환산
-    total_emotions = sum(emotion_counts.values())
-    emotion_percentages = {emotion: (count / total_emotions) for emotion, count in emotion_counts.items()}
+    total_emotions = sum(emotion_counter.values())
+    emotion_percentages = {emotion: (count / total_emotions) for emotion, count in emotion_counter.items()}
 
     # 월간 미션 수행 현황 (개수로 표현)
     year, month = map(int, date.split('-'))
@@ -80,7 +76,7 @@ def get_monthly_log_by_user(date, db, token):
 
     # 전체 미션 완료 횟수를 누적하기 위한 리스트
     # 날짜수에 맞게끔 초기 리스트를 0으로 초기화하여 생성
-    completed_mission_counts = ['0'] * num_days
+    completed_mission_counts = [0] * num_days
 
     # 전체 미션들 중 입력받은 월에 포함되며 완료된 미션들을 조회
     completed_missions = db.query(UserMission).filter(
@@ -149,3 +145,22 @@ def classify_image_by_imagenet(image):
     os.remove(temp_file_path)
 
     # 미션 키워드를 기반으로 해서
+
+
+def count_emotions(emotion_counter, file_path):
+    emotion_to_category = {
+        'neutral': 0,
+        'positive': 1,
+        'negative': 2
+    }
+
+    with open(file_path, 'r') as file:
+        for line in file:
+            parts = line.strip().split(' - ')
+
+            emotion = parts[-1]
+            if emotion in emotion_to_category:
+                category = emotion_to_category[emotion]
+                emotion_counter[category] += 1
+
+    return emotion_counter
