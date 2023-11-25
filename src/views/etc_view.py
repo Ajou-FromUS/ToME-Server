@@ -157,10 +157,8 @@ def count_emotions(emotion_counter, file_path):
     with open(file_path, 'r') as file:
         for line in file:
             parts = line.strip().split(' - ')
-
             emotion = parts[-1]
             if emotion in emotion_to_category:
-                category = emotion_to_category[emotion]
-                emotion_counter[category] += 1
+                emotion_counter[emotion] += 1
 
     return emotion_counter
