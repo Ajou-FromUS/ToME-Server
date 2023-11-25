@@ -11,6 +11,7 @@ from datetime import datetime
 from db.models.mission_model import Mission
 from db.models.user_model import User
 from db.models.user_mission_model import UserMission
+from views.etc_view import classify_image_by_imagenet
 from core.config import Settings
 
 import os
@@ -179,23 +180,35 @@ def update_user_mission_by_id(mission_id, mission_image, update_data, db, token)
         if not user_mission:
             return handle_error(status.HTTP_404_NOT_FOUND, "일치하는 미션이 존재하지 않습니다")
 
-        # 텍스트
-        if user_mission.mission.type == 0:      # 텍스트기반 미션
-            print(update_data)
-        elif user_mission.mission.type == 1:    # 이미지기반 미션
-            print(mission_image)
-        elif user_mission.mission.type == 2:    # 데시벨기반 미션
-            print(update_data)
-        else:
-            print("HELLO")
-
         valid = False
-        for key, value in update_data.items():
-            if hasattr(user_mission, key):
-                setattr(user_mission, key, value)
+
+        # 텍스트 & 데시벨 기반 미션
+        if user_mission.mission.type == 0 or user_mission.mission.type == 2:
+            if 'content' in update_data:
+                user_mission.content = update_data['content']
+                user_mission.is_compltete = True
                 valid = True
             else:
-                return handle_error(status.HTTP_422_UNPROCESSABLE_ENTITY, "일치하는 항목이 존재하지 않습니다")
+                return handle_error(status.HTTP_400_BAD_REQUEST, "content 항목이 입력되지 않았습니다")
+
+        # 이미지 기반 미션
+        elif user_mission.mission.type == 1:
+            if user_mission.mission.keyword:
+                labels = classify_image_by_imagenet(mission_image)
+                keyword = user_mission.mission.keyword.lower()
+
+                # 이미지 분석을 통한 labels 안에 keyword가 존재하는지 확인
+                if any(keyword in label.lower() for label in labels):
+                    upload_image_to_s3(mission_image)
+                    user_mission.is_complete = True
+                    valid = True
+                else:
+                    return handle_error(status.HTTP_400_BAD_REQUEST, f"올바르지 않은 이미지입니다. 해당 이미지는 {labels}를 포함하고 있습니다")
+            else:
+                # 키워드가 필요하지 않은 미션일 경우 통과
+                upload_image_to_s3(mission_image)
+                user_mission.is_complete = True
+                valid = True
 
         if valid:
             db.commit()
@@ -229,3 +242,7 @@ def delete_user_mission_by_id(mission_id, db, token):
     except Exception:
         db.rollback()
         return handle_error(status.HTTP_500_INTERNAL_SERVER_ERROR, "미션 삭제 중 오류가 발생하였습니다")
+
+
+def upload_image_to_s3(image):
+    return True

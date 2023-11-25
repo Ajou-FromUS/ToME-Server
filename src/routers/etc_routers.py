@@ -34,5 +34,4 @@ async def refresh_user_token(request: Request):
 @etc.post('/classify')
 async def classify_image(request: Request, file: UploadFile):
     image = await file.read()
-
     etc_view.classify_image_by_imagenet(image)
