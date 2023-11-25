@@ -11,5 +11,6 @@ class Mission(Base):
     content = Column(String(255), nullable=True)
     type = Column(Integer, nullable=False)
     emotion = Column(Integer, nullable=False)
+    keyword = Column(String(255), nullable=True)
 
     user_missions = relationship("UserMission", back_populates="mission")
