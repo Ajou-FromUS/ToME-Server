@@ -34,9 +34,10 @@ def count_emotions(file_path):
     with open(file_path, 'r') as file:
         for line in file:
             parts = line.strip().split(' - ')
-            if len(parts) >= 2:
-                emotion = parts[-1]
-                category = emotion_to_category.get(emotion, 'unknown')
+
+            emotion = parts[-1]
+            if emotion in emotion_to_category:
+                category = emotion_to_category[emotion]
                 emotion_counter[category] += 1
 
     # 해당 카운터 중 가장 빈도가 잦은 항목만 추출
