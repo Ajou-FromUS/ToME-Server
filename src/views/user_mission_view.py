@@ -261,8 +261,8 @@ def upload_image_to_s3(uid: str, image):
                              region_name=Settings.S3_REGION)
     m = hashlib.sha256()
     m.update(uid.encode())
-    m.update(datetime.now().encode())
+    m.update(str(datetime.now()).encode())
     img_name = m.hexdigest()
-    s3_client.put_object(image,Settings.S3_BUCKET_NAME,"img/"+img_name+".jpeg")
+    s3_client.put_object(Body=image,Bucket=Settings.S3_BUCKET_NAME,Key="img/"+img_name+".jpeg")
     s3_path = "https://fromus-tome.s3.ap-northeast-2.amazonaws.com/img/"+img_name+".jpeg"
     return s3_path
