@@ -8,7 +8,6 @@ class Mission(Base):
 
     id = Column(Integer, primary_key=True)
     title = Column(String(255), nullable=False)
-    content = Column(String(255), nullable=True)
     type = Column(Integer, nullable=False)
     emotion = Column(Integer, nullable=False)
     keyword = Column(String(255), nullable=True)
