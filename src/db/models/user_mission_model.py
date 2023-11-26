@@ -9,7 +9,6 @@ class UserMission(Base):
     id = Column(Integer, primary_key=True)
     uid = Column(Integer, ForeignKey('users.id'), nullable=False)
     mission_id = Column(Integer, ForeignKey('missions.id'), nullable=False)
-    content = Column(String(255), nullable=True)
     is_completed = Column(Boolean, default=False)
     created_at = Column(DateTime, nullable=False)
     modified_at = Column(DateTime, nullable=False)
