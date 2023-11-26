@@ -96,7 +96,8 @@ def make_img_job():
     wc=WordCloud(max_font_size=200,stopwords=spwords,background_color="white",
                  width=480,height=360,font_path="AjouTTF.ttf",
                  color_func=color_func,max_words=10,
-                 margin=25)
+                 margin=25,
+                 min_font_size=15)
 
     uid_list=get_uid_list(text_log_base_path)
 
