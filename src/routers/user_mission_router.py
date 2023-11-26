@@ -39,14 +39,14 @@ def get_user_mission_by_data(date: str, request: Request, db: Session = Depends(
 async def update_user_mission_by_id(mission_id: int, request: Request, db: Session = Depends(get_db), 
                                     token: str = Depends(verify_token), mission_image: Optional[UploadFile] = File(None)):
     # 초기 데이터 조회
-    try:
-        update_data = await request.json()
-    except json.JSONDecodeError:
-        update_data = {}
-
+    update_data = {}
     image_data = None
+
     if mission_image:
         image_data = await mission_image.read()
+
+    if not mission_image:
+        update_data = await request.json()
 
     res = user_mission_view.update_user_mission_by_id(
             mission_id=mission_id, mission_image=image_data,

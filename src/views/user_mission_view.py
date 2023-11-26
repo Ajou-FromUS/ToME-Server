@@ -80,10 +80,15 @@ def create_user_mission(db: Session, token: str):
     user_text_log_file_path = user_text_log_dir_path + "/" + "-".join([str(year), str(month), str(day)]) + ".txt"
     frequent_emotion = count_emotions(user_text_log_file_path)
 
-    mission = db.query(Mission).filter(
-        Mission.emotion == frequent_emotion,
-        Mission.type == mission_type
-    ).first()
+    if mission_type == 1:
+        mission = db.query(Mission).filter(
+            Mission.type == mission_type
+        ).first()
+    else:
+        mission = db.query(Mission).filter(
+            Mission.emotion == frequent_emotion,
+            Mission.type == mission_type
+        ).first()
     if not mission:
         return handle_error(status.HTTP_404_NOT_FOUND, "일치하는 미션이 존재하지 않습니다")
 
@@ -134,7 +139,7 @@ def get_all_user_missions_by_id(db, token):
                 status_code=status.HTTP_200_OK
             )
         else:
-            return handle_error(status.HTTP_404_NOT_FOUNT, "해당 사용자의 미션 기록이 존재하지 않습니다")
+            return handle_error(status.HTTP_404_NOT_FOUND, "해당 사용자의 미션 기록이 존재하지 않습니다")
     except Exception as e:
         print(e)
         return handle_error(status.HTTP_500_INTERNAL_SERVER_ERROR, "사용자 미션 조회 중 오류가 발생하였습니다")
@@ -193,6 +198,7 @@ def update_user_mission_by_id(mission_id, mission_image, update_data, db, token)
 
         # 이미지 기반 미션
         elif user_mission.mission.type == 1:
+            # 키워드가 존재하는 미션일 경우 이미지 분석 실행
             if user_mission.mission.keyword:
                 labels = classify_image_by_imagenet(mission_image)
                 keyword = user_mission.mission.keyword.lower()
@@ -204,8 +210,8 @@ def update_user_mission_by_id(mission_id, mission_image, update_data, db, token)
                     valid = True
                 else:
                     return handle_error(status.HTTP_400_BAD_REQUEST, f"올바르지 않은 이미지입니다. 해당 이미지는 {labels}를 포함하고 있습니다")
+            # 키워드가 필요하지 않은 미션일 경우 통과
             else:
-                # 키워드가 필요하지 않은 미션일 경우 통과
                 upload_image_to_s3(mission_image)
                 user_mission.is_complete = True
                 valid = True

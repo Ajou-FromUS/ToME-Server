@@ -3,6 +3,7 @@ from io import BytesIO
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from datetime import date, timedelta, datetime
+from dateutil.relativedelta import relativedelta
 from google.cloud import vision
 from dotenv import load_dotenv
 from collections import Counter
@@ -72,6 +73,8 @@ def get_monthly_log_by_user(date, db, token):
 
     # 월간 미션 수행 현황 (개수로 표현)
     year, month = map(int, date.split('-'))
+    start_date = datetime(year, month, 1)
+    end_date = start_date + relativedelta(months=1)
     num_days = calendar.monthrange(year, month)[1]
 
     # 전체 미션 완료 횟수를 누적하기 위한 리스트
@@ -82,8 +85,8 @@ def get_monthly_log_by_user(date, db, token):
     completed_missions = db.query(UserMission).filter(
         UserMission.uid == user.id,
         UserMission.is_completed == True,
-        UserMission.created_at >= datetime(year, month, 1),
-        UserMission.created_at < datetime(year, month + 1, 1)
+        UserMission.created_at >= start_date,
+        UserMission.created_at < end_date
     ).all()
 
     # 완료된 미션들을 순회하여 해당 날짜에 해당하는 리스트의 값을 1씩 누적
