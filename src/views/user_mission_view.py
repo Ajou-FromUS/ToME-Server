@@ -193,7 +193,7 @@ def update_user_mission_by_id(mission_id, mission_image, update_data, db, token)
         if user_mission.mission.type == 0 or user_mission.mission.type == 2:
             if 'content' in update_data:
                 user_mission.content = update_data['content']
-                user_mission.is_compltete = True
+                user_mission.is_completed = True
                 valid = True
             else:
                 return handle_error(status.HTTP_400_BAD_REQUEST, "content 항목이 입력되지 않았습니다")
@@ -207,15 +207,17 @@ def update_user_mission_by_id(mission_id, mission_image, update_data, db, token)
 
                 # 이미지 분석을 통한 labels 안에 keyword가 존재하는지 확인
                 if any(keyword in label.lower() for label in labels):
-                    upload_image_to_s3(token['uid'],mission_image)
-                    user_mission.is_complete = True
+                    image_path = upload_image_to_s3(token['uid'],mission_image)
+                    user_mission.content = image_path
+                    user_mission.is_completed = True
                     valid = True
                 else:
                     return handle_error(status.HTTP_400_BAD_REQUEST, f"올바르지 않은 이미지입니다. 해당 이미지는 {labels}를 포함하고 있습니다")
             # 키워드가 필요하지 않은 미션일 경우 통과
             else:
-                upload_image_to_s3(token['uid'],mission_image)
-                user_mission.is_complete = True
+                image_path = upload_image_to_s3(token['uid'], mission_image)
+                user_mission.content = image_path
+                user_mission.is_completed = True
                 valid = True
 
         if valid:
@@ -252,7 +254,7 @@ def delete_user_mission_by_id(mission_id, db, token):
         return handle_error(status.HTTP_500_INTERNAL_SERVER_ERROR, "미션 삭제 중 오류가 발생하였습니다")
 
 
-def upload_image_to_s3(uid:str,image):
+def upload_image_to_s3(uid: str, image):
     s3_client = boto3.client('s3',
                              aws_access_key_id=Settings.S3_ACCESS_KEY,
                              aws_secret_access_key=Settings.S3_SECRET_KEY,
