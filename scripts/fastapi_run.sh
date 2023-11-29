@@ -1,1 +1,1 @@
-docker run -it -d -p 3000:8000/tcp --name fastapi-tome -v /data/chat_user_text_log:/data/chat_user_text_log fastapi-dev:$1
+docker run -it -d -p 3000:8000/tcp --name fastapi-tome -v /data/:/data/ fastapi-dev:$1

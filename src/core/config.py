@@ -33,4 +33,6 @@ class Settings:
     S3_REGION: str = os.getenv("S3_REGION")
     S3_BUCKET_URL: str = os.getenv("S3_BUCKET_URL")
 
+    LOG_PATH: str = os.getenv("LOG_PATH")
+
 settings = Settings()
