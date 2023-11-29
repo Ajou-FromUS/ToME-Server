@@ -6,6 +6,10 @@ from routers.etc_routers import etc
 from routers.chatbot_router import chatbot
 from routers.user_mission_router import user_mission
 
+import logging
+from logging.handlers import TimedRotatingFileHandler
+
+from core.config import Settings
 
 def create_app() -> FastAPI:
     _app = FastAPI()
@@ -18,5 +22,15 @@ def create_app() -> FastAPI:
 
     return _app
 
-
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(name)s - %(message)s")
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+path = Settings.LOG_PATH+"/log.txt"
+handler = TimedRotatingFileHandler(path,
+                                   when="d",
+                                   interval=1,
+                                   backupCount=60)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.debug('SERVER STARTED')
 app = create_app()
