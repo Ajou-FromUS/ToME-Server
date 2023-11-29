@@ -15,7 +15,9 @@ import time
 import traceback
 import requests
 import json
+import logging
 
+logger=logging.getLogger()
 
 # 채팅 답변 요청
 def chat(chat_data: dict, db: Session, redis: Redis, token: str):
@@ -24,12 +26,13 @@ def chat(chat_data: dict, db: Session, redis: Redis, token: str):
     # 필수 항목 누락 체크
     required_fields = ['content']
     if not all(field in chat_data for field in required_fields):
+        logger.error(f"CHAT VIEW: Mandatory Field Is Missing")
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                             detail="필수 항목 중 일부가 누락되었습니다")
 
     if chat_data.get('content') is None:
         mission_count = get_mission_count(db, uid)
-
+        logger.info(f"MISSION COUNT for {uid} : {mission_count}")
         return {
             "status_code": status.HTTP_200_OK,
             "detail": "사용자 미션 개수 조회 성공",
@@ -47,7 +50,7 @@ def chat(chat_data: dict, db: Session, redis: Redis, token: str):
         response = bard.get_answer(input_text)['content']
         end_time = time.time()
         elapsed_time = end_time-start_time
-
+        
         start_idx = response.find('[')
         end_idx = response.find(']')
         answer = response[start_idx+1:end_idx]
@@ -67,7 +70,7 @@ def chat(chat_data: dict, db: Session, redis: Redis, token: str):
         clova_content = json.loads(clova_response.text)
         sentiment = clova_content['document']['sentiment']
 
-        print(f"uid: {uid} Elapsed Time: {elapsed_time} Input Text: {user_text} Output Text: {answer} Clova Answer: {sentiment}")
+        logger.info(f"uid: {uid} Elapsed Time: {elapsed_time} Input Text: {user_text} Output Text: {answer} Clova Answer: {sentiment}")
 
         now = datetime.now()
         year = now.year
@@ -88,6 +91,7 @@ def chat(chat_data: dict, db: Session, redis: Redis, token: str):
 
         if mission_count < 3 and line_count % 5 == 0:
             create_user_mission(db, token)
+            logger.info(f"Mission Created for {uid} Line Count: {line_count} Mission Count: {mission_count}")
 
         return {
             "status_code": status.HTTP_200_OK,
@@ -96,7 +100,7 @@ def chat(chat_data: dict, db: Session, redis: Redis, token: str):
             "mission_count": mission_count
         }
     except Exception:
-        traceback.print_exc()
+        logger.error(traceback.print_exc())
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="채팅 답변 생성 중 서버에 오류가 발생하였습니다")
 
