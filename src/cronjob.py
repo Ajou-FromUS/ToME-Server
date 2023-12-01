@@ -102,14 +102,17 @@ def make_img_job():
 
     for uid in uid_list:
         log_content=get_all_logs_with_uid_and_month(text_log_base_path,uid,year,month)
-        create_wordcloud(wc,uid,log_content,year,month)
+        if len(log_content)!=0:
+            create_wordcloud(wc,uid,log_content,year,month)
+        else:
+            print("THERE IS NO LOG:",uid)
     
     print(datetime.now(),"MAKE IMG JOB DONE")
 
 
 if __name__ == "__main__":
-    schedule.every().day.at("00:00").do(make_img_job)
-    while 1:
-        schedule.run_pending()
-        time.sleep(60)
-    # make_img_job()
+    # schedule.every().day.at("00:00").do(make_img_job)
+    # while 1:
+    #     schedule.run_pending()
+    #     time.sleep(60)
+    make_img_job()
