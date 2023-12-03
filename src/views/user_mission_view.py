@@ -180,6 +180,7 @@ def get_user_mission_by_data(date, db, token):
                         .options(joinedload(UserMission.mission))
                         .join(User)
                         .filter(User.uid == uid, date_filter)
+                        .order_by(UserMission.created_at.desc())
                         .all())
             missions_json = jsonable_encoder(missions)
 
