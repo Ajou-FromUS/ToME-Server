@@ -1,12 +1,12 @@
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import func
+from sqlalchemy import func, desc
 from fastapi import status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from collections import Counter
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from db.models.mission_model import Mission
 from db.models.user_model import User
@@ -85,12 +85,12 @@ def create_user_mission(db: Session, token: str):
     if mission_type == 1:
         mission = db.query(Mission).filter(
             Mission.type == mission_type
-        ).first()
+        ).order_by(func.random()).first()
     else:
         mission = db.query(Mission).filter(
             Mission.emotion == frequent_emotion,
             Mission.type == mission_type
-        ).first()
+        ).order_by(func.random()).first()
     if not mission:
         return handle_error(status.HTTP_404_NOT_FOUND, "일치하는 미션이 존재하지 않습니다")
 
@@ -152,20 +152,36 @@ def get_user_mission_by_data(date, db, token):
     uid = token['uid']
 
     try:
-        # 문자열을 datetime 객체로 변환
-        date_obj = datetime.strptime(date, "%Y-%m-%d").date()
+        try:
+            # 입력받은 date 매개변수를 YYYY-MM-DD로 변환 시도
+            date_obj = datetime.strptime(date, "%Y-%m-%d").date()
+            date_filter = func.date(UserMission.created_at) == date_obj
 
-        # 특정 날짜와 사용자에 대한 UserMission 조회
-        missions = (db.query(UserMission)
-                    .options(joinedload(UserMission.mission))
-                    .join(User)
-                    .filter(User.uid == uid, func.date(UserMission.created_at) == date_obj)
-                    .all())
-        missions_json = jsonable_encoder(missions)
+            missions = (db.query(UserMission)
+                        .options(joinedload(UserMission.mission))
+                        .join(User)
+                        .filter(User.uid == uid, date_filter)
+                        .order_by(desc(UserMission.is_completed))
+                        .all())
+            missions_json = jsonable_encoder(missions)
 
-        # 항상 길이가 3인 list 형태로 반환
-        while len(missions_json) < 3:
-            missions_json.append({})
+            # 항상 길이가 3인 list 형태로 반환
+            while len(missions_json) < 3:
+                missions_json.append({})
+
+        except ValueError:
+            # 위 변환이 실패할 경우, YYYY-MM로 변환 시도
+            date_obj = datetime.strptime(date, "%Y-%m")
+            month_start = date_obj.replace(day=1)
+            month_end = date_obj.replace(day=1).replace(month=date_obj.month % 12 + 1) - timedelta(days=1)
+            date_filter = func.date(UserMission.created_at).between(month_start, month_end)
+
+            missions = (db.query(UserMission)
+                        .options(joinedload(UserMission.mission))
+                        .join(User)
+                        .filter(User.uid == uid, date_filter)
+                        .all())
+            missions_json = jsonable_encoder(missions)
 
         if missions:
             return JSONResponse(
