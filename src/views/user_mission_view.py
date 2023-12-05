@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, asc
 from fastapi import status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -161,7 +161,7 @@ def get_user_mission_by_data(date, db, token):
                         .options(joinedload(UserMission.mission))
                         .join(User)
                         .filter(User.uid == uid, date_filter)
-                        .order_by(desc(UserMission.is_completed))
+                        .order_by(asc(UserMission.is_completed))
                         .all())
             missions_json = jsonable_encoder(missions)
 
