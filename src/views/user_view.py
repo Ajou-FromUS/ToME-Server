@@ -106,6 +106,10 @@ def delete_user(db: Session, token: str):
         if not user:
             return handle_error(status.HTTP_404_NOT_FOUND, "일치하는 사용자가 존재하지 않습니다")
 
+        # 사용자 정보를 참조하는 연관 데이터 삭제
+        for related_data in user.related_data:
+            db.delete(related_data)
+
         db.delete(user)
         db.commit()
 
